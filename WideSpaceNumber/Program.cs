@@ -20,48 +20,56 @@ namespace WideSpaceNumber
         public static string path = Path.Combine(Environment.CurrentDirectory, "NewTest.txt");
 
         static void Main(string[] args)
-        {   
-            Program program = new Program();
-            Random random = new Random();
-            int i = 0;
-
-            StreamWriter streamWriter = new StreamWriter(path);
-            while (i != 10)
+        {
+            int testCounter=0;
+            bool flag = false;
+            while (testCounter != 100000)
             {
-                streamWriter.WriteLine(random.NextDouble());
-                i++;
+                Program program = new Program();
+                Random random = new Random();
+                int i = 0;
+
+                StreamWriter streamWriter = new StreamWriter(path);
+                while (i != 10)
+                {
+                    streamWriter.WriteLine(random.NextDouble());
+                    i++;
+                }
+                streamWriter.Close();
+
+                // Read into array from file
+                float[] inputArray = Array.ConvertAll(File.ReadAllLines(path),
+                    float.Parse);
+
+                n = inputArray.Length;
+
+                // Call the Test Method (QuickSort & Difference)
+                TestProgram testProgram = new TestProgram();
+                int kTest = testProgram.Test(inputArray, n);
+
+                bucketArray = new List<float>[n + 1]; // Array of Lists (Buckets), of size N+1
+                // Intitialize List under each array index
+                for (i = 0; i < n + 1; i++)
+                {
+                    bucketArray[i] = new List<float>();
+                }
+
+                // Fetch value of k (partition index) by calling the PARTITION method
+                int k = program.partition(inputArray, n);
+
+                // Flag is true only if both INDEX and DIFFERENCE values match with TEST method values
+                if (kTest == k && diff.Equals(diffSort))
+                {
+                    flag = true;
+                }
+
+                testCounter++;
             }
-            streamWriter.Close();
 
-            // Read into array from file
-            float[] inputArray = Array.ConvertAll(File.ReadAllLines(path),
-                float.Parse);
-
-            n = inputArray.Length;
-
-            // Call the Test Method (QuickSort & Difference)
-            TestProgram testProgram = new TestProgram();
-            //testProgram.Test();
-            int kTest = testProgram.Test(inputArray, n);
-
-            bucketArray = new List<float>[n + 1];      // Array of Lists (Buckets), of size N+1
-            // Intitialize List under each array index
-            for (i = 0; i < n + 1; i++)
-            {
-                bucketArray[i] = new List<float>();
-            }
-
-            Console.WriteLine("Size of Array: {0}", n);     // Print Size of Array (n)
-            int k = program.partition(inputArray, n);       // Fetch value of k (partition index)
+            Console.WriteLine(flag ? "Test Successful!" : "Test FAILED!");
+            
             //Console.WriteLine("\nUsing Partition Method: Index = {0}, Difference = {1}", k, diff);  // Print index k, and max separation difference
-
-
-            Console.WriteLine("\nUsing Partition Method: Index = {0}, Difference = {1}", k, diff);  // Print index k, and max separation difference
-            Console.WriteLine("Using Sorting Method: Index = {0}, Difference = {1}", kTest, diffSort);
-
-            // Display time taken for each method, in clock ticks
-            Console.WriteLine("\nPartition Timer: " + pTimer);    // Measures clock ticks for Bucket way
-            Console.WriteLine("Sort Timer: " + sTimer);           // Measures clock ticks for QuickSort way
+            //Console.WriteLine("Using Sorting Method: Index = {0}, Difference = {1}", kTest, diffSort);
         }
 
         // Core Partition module
@@ -73,24 +81,12 @@ namespace WideSpaceNumber
             
             int i;
             float difference = 0;
-            //List<float>[] bucketArray = new List<float>[n + 1];      // Array of Lists (Buckets), of size N+1
             int bucketLength = bucketArray.Length;
-
-            //// Intitialize List under each array index
-            //for (i = 0; i < n + 1; i++)
-            //{
-            //    bucketArray[i] = new List<float>();
-            //}
 
             // Set SIZE
             SIZE = n - 1;
 
-            // Start timer
-            Stopwatch partititionTimer = new Stopwatch();
-            partititionTimer.Start();
-
             // Find and store MIN and MAX
-
             MAX = a[0];
             MIN = a[0];
 
@@ -105,8 +101,6 @@ namespace WideSpaceNumber
                     MIN = variable;
                 }
             }
-            //MAX = a.Max();
-            //MIN = a.Min();
 
             // Add MIN and MAX elements to START and END position of the BucketArray
             bucketArray[0].Add(MIN);
@@ -131,8 +125,6 @@ namespace WideSpaceNumber
                 // For buckets which are NOT empty, store local Max and local Min in each bucket, discard all other local elements
                 if (bucketArray[i].Count > 0)
                 {
-                    //float tempMin = bucketArray[i].Min();
-                    //float tempMax = bucketArray[i].Max();
                     tempMin = 100000000;
                     tempMax = -100000000;
 
@@ -167,9 +159,6 @@ namespace WideSpaceNumber
             {
                 if (bucketArray[j].Count > 0)
                 {
-                    //nextMin = bucketArray[j].Min();
-                    //prevMax = bucketArray[i].Max();
-
                     nextMin = 100000000;
                     prevMax = -100000000;
 
@@ -179,10 +168,6 @@ namespace WideSpaceNumber
                         {
                             nextMin = variable;
                         }
-                        //if (variable < tempMin)
-                        //{
-                        //    tempMin = variable;
-                        //}
                     }
 
                     foreach (var variable in bucketArray[i])
@@ -243,18 +228,9 @@ namespace WideSpaceNumber
                 i++;
             }
 
-            // Stop timer
-            partititionTimer.Stop();
-            pTimer = partititionTimer.ElapsedTicks;
-
             diff = difference;
             return k;
         }
-
-        //int GetBucketIndex(float element)
-        //{
-        //    return (int) Math.Floor(((element - MIN)*SIZE)/(MAX - MIN));
-        //}
     }
 
     /*  TEST MODULE
@@ -264,21 +240,6 @@ namespace WideSpaceNumber
         public int Test(float[] array, int n)
         {
             float difference = 0.0f;
-            //float[] array = new float[0];
-
-            // Read into array from file
-            //try
-            //{
-            //    array = Array.ConvertAll(File.ReadAllLines(Program.path),
-            //        float.Parse);
-            //}
-            //catch (FileNotFoundException)
-            //{
-            //}
-
-            // Start timer
-            Stopwatch sortTimer = new Stopwatch();
-            sortTimer.Start();
 
             int k = 0;
 
@@ -298,14 +259,6 @@ namespace WideSpaceNumber
             }
 
             Program.diffSort = difference;
-
-            //Console.WriteLine("Using Sorting Method: Index = {0}, Difference = {1}", k, difference);
-            //Program.sortKey = k;
-            
-            // Stop timer
-            sortTimer.Stop();
-            Program.sTimer = sortTimer.ElapsedTicks;
-
             return k;
         }
 
